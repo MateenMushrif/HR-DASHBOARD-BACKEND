@@ -31,7 +31,10 @@ router.get("/theme", ensureAuth, async (req: any, res) => {
 router.post("/theme", ensureAuth, async (req: any, res) => {
     try {
         const { theme } = req.body ?? {};
-        if (typeof theme !== "string" || !ALLOWED.includes(theme)) {
+        if (
+            typeof theme !== "string" ||
+            !ALLOWED.includes(theme as (typeof ALLOWED)[number])
+        ) {
             return res.status(400).json({ error: "invalid_theme", allowed: ALLOWED });
         }
 
