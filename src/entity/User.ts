@@ -16,4 +16,7 @@ export class User {
 
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     createdAt!: Date;
+
+    @Column({ name: "preferred_theme", type: "varchar", length: 64, default: 'yellow' })
+    preferredTheme!: string;
 }

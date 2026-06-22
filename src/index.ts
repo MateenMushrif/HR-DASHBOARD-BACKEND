@@ -10,6 +10,8 @@ import { seedDepartments } from "./utils/seedDepartments";
 import authRouter from "./routes/auth";
 import departmentRouter from "./routes/department";
 import employeeRouter from "./routes/employee";
+import themeRouter from "./routes/theme";
+import dashboardRouter from "./routes/dashboard";
 
 
 import { authMiddleware, AuthRequest } from "./middleware/auth";
@@ -31,7 +33,8 @@ app.use(cors({
 app.use("/auth", authRouter);
 app.use("/api/departments", departmentRouter);
 app.use("/api/employees", employeeRouter);
-
+app.use("/api/user", themeRouter);
+app.use("/api/dashboard", dashboardRouter);
 
 
 // 🔐 protected route for current user

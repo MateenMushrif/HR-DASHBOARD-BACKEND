@@ -7,7 +7,9 @@ import {
     UpdateDateColumn,
 } from "typeorm";
 import { Department } from "./Department";
+import { Index } from "typeorm";
 
+@Index(["department", "isIntern"])
 @Entity()
 export class Employee {
     @PrimaryGeneratedColumn()
@@ -31,12 +33,14 @@ export class Employee {
     @Column({ default: false })
     isIntern!: boolean;  // <-- NEW COLUMN
 
+    @Index()
     @ManyToOne(() => Department, { nullable: true, onDelete: "SET NULL" })
     department!: Department | null;
 
     @Column({ default: "ACTIVE" })
     status!: string;
 
+    @Index()
     @Column({ type: "date", nullable: true })
     dateOfJoining!: string | null;
 

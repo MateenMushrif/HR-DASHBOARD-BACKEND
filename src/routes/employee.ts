@@ -7,20 +7,59 @@ import { authMiddleware } from "../middleware/auth";
 const router = Router();
 const employeeRepo = AppDataSource.getRepository(Employee);
 
-// GET /api/employees → list all employees
+// GET /api/employees → list all employees (no pagination)
 router.get("/", authMiddleware, async (req, res) => {
     try {
-        const employees = await employeeRepo.find({
-            relations: ["department"],
-            order: { id: "ASC" },
-        });
+        const { query = "", departmentId, isIntern } =
+            req.query as Record<string, string>;
 
-        res.json({ employees });
+        const qb = employeeRepo
+            .createQueryBuilder("employee")
+            .leftJoinAndSelect("employee.department", "department");
+
+        // Search
+        if (query && String(query).trim() !== "") {
+            const q = `%${String(query).trim()}%`;
+            qb.andWhere(
+                "(employee.firstName ILIKE :q OR employee.lastName ILIKE :q OR employee.email ILIKE :q)",
+                { q }
+            );
+        }
+
+        // Department filter
+        if (departmentId) {
+            qb.andWhere("department.id = :deptId", { deptId: Number(departmentId) });
+        }
+
+        // isIntern filter
+        if (typeof isIntern !== "undefined") {
+            const internBool = String(isIntern).toLowerCase() === "true";
+            qb.andWhere("employee.isIntern = :isIntern", { isIntern: internBool });
+        }
+
+        // Order newest first
+        qb.orderBy("employee.id", "DESC");
+
+        // Execute (return all matching rows)
+        const employees = await qb.getMany();
+        const total = employees.length;
+
+        // Helpful header for clients that look at headers
+        res.setHeader("X-Total-Count", String(total));
+
+        return res.json({
+            employees,
+            total,
+            totalPages: 1,
+            page: 1,
+            limit: total,
+        });
     } catch (err) {
-        console.error("Error fetching employees:", err);
-        res.status(500).json({ message: "Failed to fetch employees" });
+        console.error("GET /api/employees error:", err);
+        return res.status(500).json({ message: "Failed to fetch employees" });
     }
 });
+
 
 
 // GET /api/employees/stats/hires-last-6-months
@@ -287,5 +326,35 @@ router.patch("/:id/status", authMiddleware, async (req, res) => {
         res.status(500).json({ message: "Failed to update employee status" });
     }
 });
+
+
+// DELETE /api/employees/:id → delete an employee
+router.delete("/:id", authMiddleware, async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).json({ message: "Invalid employee id" });
+        }
+
+        const employee = await employeeRepo.findOne({
+            where: { id },
+            relations: ["department"],
+        });
+
+        if (!employee) {
+            return res.status(404).json({ message: "Employee not found" });
+        }
+
+        // Remove the entity and return the removed record for client confirmation.
+        // Using remove() ensures hooks/entities are respected; delete() is faster but returns no entity.
+        await employeeRepo.remove(employee);
+
+        return res.json({ message: "Employee deleted", employeeId: id });
+    } catch (err) {
+        console.error("Error deleting employee:", err);
+        return res.status(500).json({ message: "Failed to delete employee" });
+    }
+});
+
 
 export default router;
