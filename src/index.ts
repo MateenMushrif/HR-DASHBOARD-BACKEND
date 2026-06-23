@@ -23,13 +23,25 @@ app.use(cookieParser());
 
 
 // allow Next.js frontend to call backend API
-app.use(cors({
-    origin: [
-        "http://localhost:3000",
-        "https://hrdashobodo-l2lfsaqay-mateens-projects-f987f120.vercel.app"
-    ], // your Next.js port
-    credentials: true,
-}));
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin) {
+                return callback(null, true);
+            }
+
+            if (
+                origin === "http://localhost:3000" ||
+                origin.endsWith(".vercel.app")
+            ) {
+                return callback(null, true);
+            }
+
+            return callback(new Error("Not allowed by CORS"));
+        },
+        credentials: true,
+    })
+);
 
 
 // public routes
