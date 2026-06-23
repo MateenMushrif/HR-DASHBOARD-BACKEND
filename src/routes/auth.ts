@@ -49,8 +49,8 @@ router.post("/signup", async (req, res) => {
 
         res.cookie("auth_token", token, {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
             path: "/",
         });
 
@@ -90,8 +90,8 @@ router.post("/login", async (req, res) => {
 
         res.cookie("auth_token", token, {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
             path: "/",
         });
 
@@ -109,8 +109,8 @@ router.post("/login", async (req, res) => {
 router.post("/logout", (req, res) => {
     res.clearCookie("auth_token", {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
         path: "/",
     });
 
