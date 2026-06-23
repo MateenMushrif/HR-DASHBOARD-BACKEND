@@ -24,7 +24,10 @@ app.use(cookieParser());
 
 // allow Next.js frontend to call backend API
 app.use(cors({
-    origin: "http://localhost:3000", // your Next.js port
+    origin: [
+        "http://localhost:3000",
+        "https://hrdashobodo.vercel.app"
+    ], // your Next.js port
     credentials: true,
 }));
 
