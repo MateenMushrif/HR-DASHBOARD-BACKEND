@@ -26,7 +26,7 @@ app.use(cookieParser());
 app.use(cors({
     origin: [
         "http://localhost:3000",
-        "https://hrdashobodo.vercel.app"
+        "https://hrdashobodo-l2lfsaqay-mateens-projects-f987f120.vercel.app"
     ], // your Next.js port
     credentials: true,
 }));
